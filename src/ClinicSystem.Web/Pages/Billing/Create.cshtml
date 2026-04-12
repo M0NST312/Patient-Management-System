@@ -44,15 +44,15 @@
                 <div class="item-row row g-2 mb-2 align-items-end" data-index="0">
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:.8rem;">Description <span class="text-danger">*</span></label>
-                        <input name="Items[0].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
+                        <input name="Input.Items[0].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label" style="font-size:.8rem;">Unit Price</label>
-                        <input name="Items[0].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
+                        <input name="Input.Items[0].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label" style="font-size:.8rem;">Qty</label>
-                        <input name="Items[0].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
+                        <input name="Input.Items[0].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label" style="font-size:.8rem;">Line Total</label>
@@ -127,13 +127,13 @@ function addItem() {
     row.dataset.index = idx;
     row.innerHTML = `
         <div class="col-md-6">
-            <input name="Items[${idx}].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
+            <input name="Input.Items[${idx}].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
         </div>
         <div class="col-md-2">
-            <input name="Items[${idx}].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
+            <input name="Input.Items[${idx}].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
         </div>
         <div class="col-md-2">
-            <input name="Items[${idx}].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
+            <input name="Input.Items[${idx}].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
         </div>
         <div class="col-md-1">
             <div class="form-control form-control-sm bg-light item-total text-end" style="cursor:default;">E0.00</div>
