@@ -1,0 +1,70 @@
+@page
+@model ClinicSystem.Web.Pages.Visits.IndexModel
+@{
+    ViewData["Title"] = "Visits";
+}
+
+<div class="action-bar">
+    <form method="get" class="d-flex gap-2">
+        <select name="StatusFilter" class="form-select form-select-sm" style="width:160px;" onchange="this.form.submit()">
+            <option value="" selected="@(Model.StatusFilter == null)">All Statuses</option>
+            <option value="Scheduled" selected="@(Model.StatusFilter == "Scheduled")">Scheduled</option>
+            <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Completed</option>
+            <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled")">Cancelled</option>
+        </select>
+    </form>
+    @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+    {
+        <a asp-page="Create" class="btn btn-primary"><i class="bi bi-calendar2-plus me-1"></i>New Visit</a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Visits.Any())
+        {
+            <div class="empty-state"><i class="bi bi-calendar2-x"></i><p>No visits found.</p></div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Complaint</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var v in Model.Visits)
+                {
+                    <tr>
+                        <td class="text-nowrap">@v.VisitDate.ToLocalTime().ToString("MMM d, yyyy")</td>
+                        <td>
+                            <a asp-page="/Patients/Details" asp-route-id="@v.PatientId" class="text-decoration-none">
+                                @v.PatientName
+                            </a>
+                        </td>
+                        <td class="text-muted">@v.DoctorName</td>
+                        <td class="text-muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            @v.Complaint
+                        </td>
+                        <td>
+                            <span class="badge badge-@v.Status.ToString().ToLower()">@v.Status</span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+<p class="text-muted mt-2" style="font-size:.8rem;">@Model.Visits.Count visit(s) shown</p>

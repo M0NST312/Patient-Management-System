@@ -1,0 +1,169 @@
+@page "{id:guid}"
+@model ClinicSystem.Web.Pages.Visits.DetailsModel
+@{
+    ViewData["Title"] = $"Visit — {Model.Visit?.PatientName}";
+    ViewData["BackUrl"] = "/Visits";
+}
+
+@if (Model.Visit is null)
+{
+    <div class="alert alert-warning">Visit not found.</div>
+    return;
+}
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar2-check me-2"></i>Visit Details</span>
+                <span class="badge badge-@Model.Visit.Status.ToString().ToLower() fs-6">@Model.Visit.Status</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;">Patient</p>
+                        <p class="fw-semibold mb-0"><a asp-page="/Patients/Details" asp-route-id="@Model.Visit.PatientId" class="text-decoration-none">@Model.Visit.PatientName</a></p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;">Doctor</p>
+                        <p class="fw-semibold mb-0">@Model.Visit.DoctorName</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;">Date</p>
+                        <p class="mb-0">@Model.Visit.VisitDate.ToLocalTime().ToString("MMMM d, yyyy h:mm tt")</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;">Complaint</p>
+                        <p class="mb-0">@Model.Visit.Complaint</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Visit.Notes))
+                    {
+                        <div class="col-12">
+                            <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;">Clinical Notes</p>
+                            <p class="mb-0" style="white-space:pre-wrap;">@Model.Visit.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnoses -->
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-clipboard2-pulse me-2 text-danger"></i>Diagnoses</div>
+            <div class="card-body">
+                @if (!Model.Visit.Diagnoses.Any())
+                {
+                    <p class="text-muted mb-3">No diagnoses recorded yet.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-3">
+                    @foreach (var d in Model.Visit.Diagnoses)
+                    {
+                        <li class="d-flex align-items-start gap-2 mb-2 p-2 rounded" style="background:#f8fafc;">
+                            <i class="bi bi-clipboard2-heart text-danger mt-1"></i>
+                            <div class="flex-grow-1">
+                                <span>@d.Description</span>
+                                @if (!string.IsNullOrEmpty(d.Icd10Code)) { <span class="badge bg-light text-dark ms-2 font-monospace">@d.Icd10Code</span> }
+                            </div>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            {
+                                <form method="post" asp-page-handler="RemoveDiagnosis" asp-route-diagnosisId="@d.Id" class="ms-auto">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this diagnosis?')"><i class="bi bi-trash"></i></button>
+                                </form>
+                            }
+                        </li>
+                    }
+                    </ul>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                {
+                    <form method="post" asp-page-handler="AddDiagnosis">
+                        <div class="row g-2">
+                            <div class="col-md-7">
+                                <input name="DiagnosisDescription" class="form-control form-control-sm" placeholder="Diagnosis description…" required />
+                            </div>
+                            <div class="col-md-3">
+                                <input name="Icd10Code" class="form-control form-control-sm font-monospace" placeholder="ICD-10 code" />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-outline-danger w-100" type="submit"><i class="bi bi-plus-lg me-1"></i>Add</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <!-- Prescriptions -->
+        <div class="card">
+            <div class="card-header"><i class="bi bi-capsule me-2 text-primary"></i>Prescriptions</div>
+            <div class="card-body">
+                @if (!Model.Visit.Prescriptions.Any())
+                {
+                    <p class="text-muted mb-3">No prescriptions recorded yet.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-3">
+                    @foreach (var p in Model.Visit.Prescriptions)
+                    {
+                        <li class="d-flex align-items-start gap-2 mb-2 p-2 rounded" style="background:#f0f9ff;">
+                            <i class="bi bi-capsule text-primary mt-1"></i>
+                            <div class="flex-grow-1">
+                                <span class="fw-medium">@p.MedicationName</span>
+                                @if (!string.IsNullOrEmpty(p.Dosage)) { <span class="text-muted ms-2">@p.Dosage</span> }
+                                @if (!string.IsNullOrEmpty(p.Instructions)) { <div class="text-muted" style="font-size:.85rem;">@p.Instructions</div> }
+                            </div>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            {
+                                <form method="post" asp-page-handler="RemovePrescription" asp-route-prescriptionId="@p.Id" class="ms-auto">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this prescription?')"><i class="bi bi-trash"></i></button>
+                                </form>
+                            }
+                        </li>
+                    }
+                    </ul>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                {
+                    <form method="post" asp-page-handler="AddPrescription">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input name="MedicationName" class="form-control form-control-sm" placeholder="Medication name…" required />
+                            </div>
+                            <div class="col-md-2">
+                                <input name="Dosage" class="form-control form-control-sm" placeholder="Dosage" />
+                            </div>
+                            <div class="col-md-4">
+                                <input name="Instructions" class="form-control form-control-sm" placeholder="Instructions" />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-outline-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i>Add</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-lightning me-2"></i>Quick Actions</div>
+            <div class="card-body d-flex flex-column gap-2">
+                <a asp-page="/Patients/Details" asp-route-id="@Model.Visit.PatientId" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-2"></i>View Patient Record</a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                {
+                    <a asp-page="/Billing/Create" class="btn btn-outline-warning btn-sm"><i class="bi bi-receipt me-2"></i>Create Invoice</a>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Delete this visit? This cannot be undone.')">
+                        <button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash me-2"></i>Delete Visit</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@page
+@model ClinicSystem.Web.Pages.Patients.IndexModel
+@{
+    ViewData["Title"] = "Patients";
+}
+<div class="action-bar">
+    <form method="get" class="d-flex gap-2 flex-grow-1" style="max-width:400px;">
+        <div class="search-box flex-grow-1">
+            <i class="bi bi-search"></i>
+            <input class="form-control" type="text" name="Search" value="@Model.Search" placeholder="Search by name or national ID…" />
+        </div>
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <a asp-page="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+        }
+    </form>
+    <a asp-page="Create" class="btn btn-primary"><i class="bi bi-person-plus-fill me-1"></i>New Patient</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Patients.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                @if (!string.IsNullOrWhiteSpace(Model.Search))
+                {
+                    <p>No patients found matching "<strong>@Model.Search</strong>"</p>
+                }
+                else
+                {
+                    <p>No patients yet. <a asp-page="Create">Register the first patient.</a></p>
+                }
+            </div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>National ID</th>
+                        <th>Date of Birth</th>
+                        <th>Gender</th>
+                        <th>Blood Type</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model.Patients)
+                {
+                    <tr>
+                        <td>
+                            <a asp-page="Details" asp-route-id="@p.Id" class="fw-medium text-decoration-none">
+                                <i class="bi bi-person-circle me-1 text-muted"></i>@p.FullName
+                            </a>
+                        </td>
+                        <td class="text-muted">@p.NationalId</td>
+                        <td class="text-muted">@p.DateOfBirth.ToString("MMM d, yyyy")</td>
+                        <td><span class="badge bg-light text-dark">@p.Gender</span></td>
+                        <td>@(p.BloodType ?? "—")</td>
+                        <td class="text-end">
+                            <a asp-page="Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i></a>
+                            <a asp-page="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+<p class="text-muted mt-2" style="font-size:.8rem;">@Model.Patients.Count patient(s) shown</p>

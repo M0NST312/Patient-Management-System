@@ -1,0 +1,171 @@
+@page
+@model ClinicSystem.Web.Pages.Billing.CreateModel
+@{
+    ViewData["Title"] = "New Invoice";
+    ViewData["BackUrl"] = Model.FromPatientId.HasValue ? $"/Patients/Details/{Model.FromPatientId}" : "/Billing";
+}
+
+<div class="card" style="max-width:750px;">
+    <div class="card-header"><i class="bi bi-receipt me-2"></i>Create Invoice</div>
+    <div class="card-body">
+        <form method="post" id="invoiceForm">
+            <input type="hidden" name="FromPatientId" value="@Model.FromPatientId" />
+            <div asp-validation-summary="All" class="alert alert-danger" style="@(ViewData.ModelState.IsValid ? "display:none" : "")"></div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Patient <span class="text-danger">*</span></label>
+                    <div class="patient-search-wrap position-relative">
+                        <input type="text" id="patientSearchText" class="form-control" placeholder="Search by name or national ID…"
+                               autocomplete="off" value="@Model.PreselectedPatientName" />
+                        <div id="patientDropdown" class="shadow-sm border rounded bg-white" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:200;max-height:220px;overflow-y:auto;"></div>
+                    </div>
+                    <input type="hidden" id="patientIdInput" name="Input.PatientId" value="@Model.Input.PatientId" />
+                    <span asp-validation-for="Input.PatientId" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.DiscountAmount" class="form-label">Discount Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">E</span>
+                        <input asp-for="Input.DiscountAmount" class="form-control" type="number" step="0.01" min="0" id="discountInput" />
+                    </div>
+                </div>
+            </div>
+
+            <hr class="section-divider" />
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-muted mb-0" style="text-transform:uppercase;font-size:.72rem;letter-spacing:.08em;">Line Items</h6>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addItem()">
+                    <i class="bi bi-plus-lg me-1"></i>Add Item
+                </button>
+            </div>
+
+            <div id="itemsContainer">
+                <div class="item-row row g-2 mb-2 align-items-end" data-index="0">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:.8rem;">Description <span class="text-danger">*</span></label>
+                        <input name="Items[0].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.8rem;">Unit Price</label>
+                        <input name="Items[0].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.8rem;">Qty</label>
+                        <input name="Items[0].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.8rem;">Line Total</label>
+                        <div class="form-control form-control-sm bg-light item-total text-end" style="cursor:default;">E0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3 me-2">
+                <div class="text-end">
+                    <div class="text-muted" style="font-size:.85rem;">Subtotal: <span id="subtotal">E0.00</span></div>
+                    <div class="text-muted" style="font-size:.85rem;">Discount: <span id="discountDisplay">E0.00</span></div>
+                    <div class="fw-bold fs-5">Total: <span id="grandTotal">E0.00</span></div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create Invoice</button>
+                <a href="@(Model.FromPatientId.HasValue ? $"/Patients/Details/{Model.FromPatientId}" : "/Billing")" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Patient search
+const patients = @Html.Raw(Model.PatientsJson);
+const searchInput = document.getElementById('patientSearchText');
+const dropdown = document.getElementById('patientDropdown');
+const hiddenInput = document.getElementById('patientIdInput');
+
+searchInput.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { dropdown.style.display = 'none'; return; }
+    const matches = patients.filter(p =>
+        p.name.toLowerCase().includes(q) || p.nationalId.toLowerCase().includes(q)
+    ).slice(0, 12);
+    if (!matches.length) { dropdown.innerHTML = '<div class="px-3 py-2 text-muted" style="font-size:.85rem;">No patients found</div>'; }
+    else {
+        dropdown.innerHTML = matches.map(p =>
+            `<div class="patient-option px-3 py-2" style="cursor:pointer;font-size:.875rem;" data-id="${p.id}" data-name="${p.name}">
+                <span class="fw-medium">${p.name}</span>
+                <span class="text-muted ms-2" style="font-size:.78rem;">${p.nationalId}</span>
+             </div>`
+        ).join('');
+        dropdown.querySelectorAll('.patient-option').forEach(el => {
+            el.addEventListener('mouseenter', () => el.style.background = '#f1f5f9');
+            el.addEventListener('mouseleave', () => el.style.background = '');
+            el.addEventListener('click', () => {
+                hiddenInput.value = el.dataset.id;
+                searchInput.value = el.dataset.name;
+                dropdown.style.display = 'none';
+            });
+        });
+    }
+    dropdown.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.patient-search-wrap')) dropdown.style.display = 'none';
+});
+
+// Invoice line items
+let itemCount = 1;
+
+function addItem() {
+    const idx = itemCount++;
+    const container = document.getElementById('itemsContainer');
+    const row = document.createElement('div');
+    row.className = 'item-row row g-2 mb-2 align-items-end';
+    row.dataset.index = idx;
+    row.innerHTML = `
+        <div class="col-md-6">
+            <input name="Items[${idx}].Description" class="form-control form-control-sm item-desc" placeholder="Service description…" required />
+        </div>
+        <div class="col-md-2">
+            <input name="Items[${idx}].UnitPrice" class="form-control form-control-sm item-price" type="number" step="0.01" min="0.01" placeholder="0.00" required onchange="updateTotal()" />
+        </div>
+        <div class="col-md-2">
+            <input name="Items[${idx}].Quantity" class="form-control form-control-sm item-qty" type="number" min="1" value="1" required onchange="updateTotal()" />
+        </div>
+        <div class="col-md-1">
+            <div class="form-control form-control-sm bg-light item-total text-end" style="cursor:default;">E0.00</div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+        </div>`;
+    container.appendChild(row);
+}
+
+function removeItem(btn) {
+    const row = btn.closest('.item-row');
+    if (document.querySelectorAll('.item-row').length > 1) { row.remove(); updateTotal(); }
+}
+
+function updateTotal() {
+    let subtotal = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+        const price = parseFloat(row.querySelector('.item-price')?.value) || 0;
+        const qty   = parseInt(row.querySelector('.item-qty')?.value)   || 1;
+        const line  = price * qty;
+        subtotal   += line;
+        const el = row.querySelector('.item-total');
+        if (el) el.textContent = 'E' + line.toFixed(2);
+    });
+    const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
+    const grand = Math.max(0, subtotal - discount);
+    document.getElementById('subtotal').textContent      = 'E' + subtotal.toFixed(2);
+    document.getElementById('discountDisplay').textContent = 'E' + discount.toFixed(2);
+    document.getElementById('grandTotal').textContent    = 'E' + grand.toFixed(2);
+}
+
+document.getElementById('discountInput')?.addEventListener('input', updateTotal);
+</script>
+}

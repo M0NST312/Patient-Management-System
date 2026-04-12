@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Clinic System</title>
+    <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-width: 230px; --sidebar-bg: #1e293b; --sidebar-text: #94a3b8; --sidebar-active: #3b82f6; --accent: #3b82f6; }
+        body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .sidebar { width: var(--sidebar-width); min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 100; display: flex; flex-direction: column; }
+        .sidebar-brand { padding: 1.25rem 1.5rem; border-bottom: 1px solid #334155; }
+        .sidebar-brand .brand-name { color: #f1f5f9; font-weight: 700; font-size: 1.1rem; margin: 0; }
+        .sidebar-brand .brand-sub { color: #64748b; font-size: 0.72rem; }
+        .sidebar-nav { flex: 1; padding: 1rem 0.75rem; }
+        .nav-label { color: #475569; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; padding: 0.5rem 0.75rem 0.25rem; }
+        .sidebar .nav-link { color: var(--sidebar-text); border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.625rem; margin-bottom: 2px; transition: all .15s; }
+        .sidebar .nav-link:hover { background: #334155; color: #e2e8f0; }
+        .sidebar .nav-link.active { background: var(--sidebar-active); color: #fff; }
+        .sidebar .nav-link i { font-size: 1rem; width: 1.1rem; text-align: center; }
+        .sidebar-footer { padding: 1rem; border-top: 1px solid #334155; }
+        .sidebar-footer .nav-link { color: #ef4444; }
+        .sidebar-footer .nav-link:hover { background: #3f1212; color: #fca5a5; }
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .topbar-title { font-size: 1.125rem; font-weight: 600; color: #0f172a; margin: 0; }
+        .page-content { padding: 2rem; }
+        .card { border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+        .card-header { background: #fff; border-bottom: 1px solid #f1f5f9; border-radius: 12px 12px 0 0 !important; padding: 1rem 1.25rem; font-weight: 600; }
+        .stat-card { border-radius: 12px; padding: 1.25rem; border: none; }
+        .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+        .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+        .badge-status-unpaid { background: #fef3c7; color: #92400e; }
+        .badge-status-partial { background: #dbeafe; color: #1e40af; }
+        .badge-status-paid { background: #dcfce7; color: #166534; }
+        .badge-scheduled { background: #f3f4f6; color: #374151; }
+        .badge-completed { background: #dcfce7; color: #166534; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+        .table { font-size: 0.875rem; }
+        .table thead th { background: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #e2e8f0; }
+        .table td { vertical-align: middle; border-color: #f1f5f9; }
+        .table tbody tr:hover { background: #f8fafc; }
+        .btn-primary { background: var(--accent); border-color: var(--accent); }
+        .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+        .form-control, .form-select { border-color: #e2e8f0; border-radius: 8px; font-size: 0.875rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+        .form-label { font-weight: 500; font-size: 0.875rem; color: #374151; margin-bottom: 4px; }
+        .invalid-feedback { font-size: 0.8rem; }
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; }
+        .section-divider { border: none; border-top: 1px solid #f1f5f9; margin: 1.5rem 0; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+        .action-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+        .search-box { position: relative; }
+        .search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box input { padding-left: 2rem; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-2">
+            <div style="background:#3b82f6;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-heart-pulse-fill text-white" style="font-size:.9rem;"></i>
+            </div>
+            <div>
+                <p class="brand-name">ClinicSystem</p>
+                <p class="brand-sub mb-0">Management Portal</p>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <p class="nav-label">Main</p>
+        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")" asp-page="/Index">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <p class="nav-label mt-2">Clinical</p>
+        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Patients") == true ? "active" : "")" asp-page="/Patients/Index">
+            <i class="bi bi-people"></i> Patients
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Visits") == true ? "active" : "")" asp-page="/Visits/Index">
+            <i class="bi bi-calendar2-check"></i> Visits
+        </a>
+        <p class="nav-label mt-2">Finance</p>
+        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Billing") == true ? "active" : "")" asp-page="/Billing/Index">
+            <i class="bi bi-receipt"></i> Billing
+        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <p class="nav-label mt-2">Administration</p>
+            <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Admin") == true ? "active" : "")" asp-page="/Admin/Users/Index">
+                <i class="bi bi-people-fill"></i> User Management
+            </a>
+        }
+    </nav>
+    <div class="sidebar-footer">
+        <div class="d-flex align-items-center gap-2 mb-2 px-1">
+            <div style="width:32px;height:32px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-person-fill text-slate-400" style="color:#94a3b8;"></i>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="color:#e2e8f0;font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@User.Identity?.Name</div>
+                <div style="color:#64748b;font-size:.7rem;">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
+            </div>
+        </div>
+        <a class="nav-link" asp-page="/Account/Logout"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <h1 class="topbar-title">@ViewData["Title"]</h1>
+        <div class="d-flex align-items-center gap-2">
+            @if (ViewData["BackUrl"] != null)
+            {
+                <a href="@ViewData["BackUrl"]" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+            }
+        </div>
+    </div>
+    <div class="page-content">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @RenderBody()
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+@RenderSection("Scripts", required: false)
+</body>
+</html>

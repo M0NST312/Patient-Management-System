@@ -1,0 +1,107 @@
+@page
+@model ClinicSystem.Web.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="action-bar">
+    <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="userSearch" class="form-control form-control-sm" placeholder="Search users…" style="width:240px;padding-left:2rem;">
+    </div>
+    <a asp-page="Create" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>New User</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Users.Any())
+        {
+            <div class="empty-state"><i class="bi bi-people"></i><p>No users found.</p></div>
+        }
+        else
+        {
+            <table class="table mb-0" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var u in Model.Users)
+                {
+                    <tr class="user-row">
+                        <td class="fw-medium user-name">@u.FullName</td>
+                        <td class="font-monospace text-muted user-username">@u.Username</td>
+                        <td class="text-muted">@(u.Email ?? "—")</td>
+                        <td>
+                            @{
+                                var roleClass = u.Role.ToString() switch {
+                                    "Admin" => "bg-danger",
+                                    "Doctor" => "bg-primary",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @roleClass">@u.Role</span>
+                        </td>
+                        <td>
+                            @if (u.IsActive)
+                            {
+                                <span class="badge" style="background:#dcfce7;color:#166534;">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:#fee2e2;color:#991b1b;">Inactive</span>
+                            }
+                        </td>
+                        <td class="text-muted" style="font-size:.82rem;">
+                            @(u.LastLoginAtUtc.HasValue ? u.LastLoginAtUtc.Value.ToLocalTime().ToString("MMM d, yyyy HH:mm") : "Never")
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex gap-1 justify-content-end">
+                                <a asp-page="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" asp-page-handler="Toggle" asp-route-id="@u.Id" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm @(u.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                            title="@(u.IsActive ? "Deactivate" : "Activate")">
+                                        <i class="bi @(u.IsActive ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                    </button>
+                                </form>
+                                @if (u.Username != User.Identity!.Name)
+                                {
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@u.Id" style="display:inline;"
+                                          onsubmit="return confirm('Delete user @u.FullName? This cannot be undone.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+<p class="text-muted mt-2" style="font-size:.8rem;">@Model.Users.Count() user(s)</p>
+
+@section Scripts {
+<script>
+document.getElementById('userSearch')?.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.user-row').forEach(row => {
+        const name = row.querySelector('.user-name')?.textContent.toLowerCase() ?? '';
+        const uname = row.querySelector('.user-username')?.textContent.toLowerCase() ?? '';
+        row.style.display = (!q || name.includes(q) || uname.includes(q)) ? '' : 'none';
+    });
+});
+</script>
+}

@@ -1,0 +1,99 @@
+@page
+@model ClinicSystem.Web.Pages.Visits.CreateModel
+@{
+    ViewData["Title"] = "New Visit";
+    ViewData["BackUrl"] = Model.FromPatientId.HasValue ? $"/Patients/Details/{Model.FromPatientId}" : "/Visits";
+}
+
+<div class="card" style="max-width:680px;">
+    <div class="card-header"><i class="bi bi-calendar2-plus me-2"></i>Schedule Visit</div>
+    <div class="card-body">
+        <form method="post">
+            <input type="hidden" name="FromPatientId" value="@Model.FromPatientId" />
+            <div asp-validation-summary="All" class="alert alert-danger" style="@(ViewData.ModelState.IsValid ? "display:none" : "")"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Patient <span class="text-danger">*</span></label>
+                    <div class="patient-search-wrap position-relative">
+                        <input type="text" id="patientSearchText" class="form-control" placeholder="Search by name or national ID…"
+                               autocomplete="off" value="@Model.PreselectedPatientName" />
+                        <div id="patientDropdown" class="shadow-sm border rounded bg-white" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:200;max-height:220px;overflow-y:auto;"></div>
+                    </div>
+                    <input type="hidden" id="patientIdInput" name="Input.PatientId" value="@Model.Input.PatientId" />
+                    <span asp-validation-for="Input.PatientId" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.DoctorName" class="form-label">Doctor <span class="text-danger">*</span></label>
+                    <input asp-for="Input.DoctorName" class="form-control" placeholder="Dr. Name" />
+                    <span asp-validation-for="Input.DoctorName" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.VisitDate" class="form-label">Visit Date &amp; Time <span class="text-danger">*</span></label>
+                    <input asp-for="Input.VisitDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="Input.VisitDate" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Status" class="form-label">Status</label>
+                    <select asp-for="Input.Status" class="form-select">
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Input.Complaint" class="form-label">Complaint / Reason <span class="text-danger">*</span></label>
+                    <input asp-for="Input.Complaint" class="form-control" placeholder="Chief complaint or reason for visit" />
+                    <span asp-validation-for="Input.Complaint" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Input.Notes" class="form-label">Clinical Notes</label>
+                    <textarea asp-for="Input.Notes" class="form-control" rows="4" placeholder="Observations, findings, etc."></textarea>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Visit</button>
+                <a href="@(Model.FromPatientId.HasValue ? $"/Patients/Details/{Model.FromPatientId}" : "/Visits")" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const patients = @Html.Raw(Model.PatientsJson);
+const searchInput = document.getElementById('patientSearchText');
+const dropdown = document.getElementById('patientDropdown');
+const hiddenInput = document.getElementById('patientIdInput');
+
+searchInput.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { dropdown.style.display = 'none'; return; }
+    const matches = patients.filter(p =>
+        p.name.toLowerCase().includes(q) || p.nationalId.toLowerCase().includes(q)
+    ).slice(0, 12);
+    if (!matches.length) { dropdown.innerHTML = '<div class="px-3 py-2 text-muted" style="font-size:.85rem;">No patients found</div>'; }
+    else {
+        dropdown.innerHTML = matches.map(p =>
+            `<div class="patient-option px-3 py-2" style="cursor:pointer;font-size:.875rem;" data-id="${p.id}" data-name="${p.name}">
+                <span class="fw-medium">${p.name}</span>
+                <span class="text-muted ms-2" style="font-size:.78rem;">${p.nationalId}</span>
+             </div>`
+        ).join('');
+        dropdown.querySelectorAll('.patient-option').forEach(el => {
+            el.addEventListener('mouseenter', () => el.style.background = '#f1f5f9');
+            el.addEventListener('mouseleave', () => el.style.background = '');
+            el.addEventListener('click', () => {
+                hiddenInput.value = el.dataset.id;
+                searchInput.value = el.dataset.name;
+                dropdown.style.display = 'none';
+            });
+        });
+    }
+    dropdown.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.patient-search-wrap')) dropdown.style.display = 'none';
+});
+</script>
+}

@@ -1,0 +1,177 @@
+@page "{id:guid}"
+@model ClinicSystem.Web.Pages.Patients.DetailsModel
+@{
+    ViewData["Title"] = Model.Patient?.FullName ?? "Patient Details";
+    ViewData["BackUrl"] = "/Patients";
+}
+
+@if (Model.Patient is null)
+{
+    <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>Patient not found.</div>
+    return;
+}
+
+<div class="row g-3 mb-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-vcard me-2"></i>Patient Information</span>
+                <a asp-page="Edit" asp-route-id="@Model.Patient.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Full Name</p>
+                        <p class="fw-semibold mb-0">@Model.Patient.FullName</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">National ID</p>
+                        <p class="fw-semibold mb-0 font-monospace">@Model.Patient.NationalId</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Date of Birth</p>
+                        <p class="mb-0">@Model.Patient.DateOfBirth.ToString("MMMM d, yyyy")</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Gender</p>
+                        <p class="mb-0">@Model.Patient.Gender</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <p class="text-muted mb-0" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Blood Type</p>
+                        <p class="mb-0">
+                            @if (!string.IsNullOrEmpty(Model.Patient.BloodType))
+                            {
+                                <span class="badge bg-danger">@Model.Patient.BloodType</span>
+                            }
+                            else { <span class="text-muted">Not recorded</span> }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-geo-alt me-2"></i>Address</div>
+            <div class="card-body">
+                @if (Model.Patient.Address != null)
+                {
+                    <address class="mb-0">
+                        @Model.Patient.Address.Line1<br />
+                        @if (!string.IsNullOrEmpty(Model.Patient.Address.Line2)) { @Model.Patient.Address.Line2 <br /> }
+                        @Model.Patient.Address.City@(!string.IsNullOrEmpty(Model.Patient.Address.State) ? $", {Model.Patient.Address.State}" : "")<br />
+                        @(!string.IsNullOrEmpty(Model.Patient.Address.PostalCode) ? $"{Model.Patient.Address.PostalCode} " : "")@Model.Patient.Address.Country
+                    </address>
+                }
+                else { <p class="text-muted mb-0">No address on file</p> }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Patient.Contacts != null && Model.Patient.Contacts.Any())
+{
+    <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-telephone me-2"></i>Contact Information</div>
+        <div class="card-body">
+            <div class="row g-2">
+                @foreach (var c in Model.Patient.Contacts)
+                {
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="p-2 rounded" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-@(c.Type.ToLower() == "phone" || c.Type.ToLower() == "mobile" ? "phone" : "envelope") text-muted"></i>
+                                <div>
+                                    <div style="font-size:.75rem;color:#64748b;">@c.Type @(c.IsEmergency ? "• Emergency" : "")</div>
+                                    <div class="fw-medium">@c.Value</div>
+                                </div>
+                                @if (c.IsEmergency) { <span class="badge bg-danger ms-auto">Emergency</span> }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<ul class="nav nav-tabs mb-3" id="patientTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#visitsTab">
+            <i class="bi bi-calendar2-check me-1"></i>Visits (@Model.Visits.Count)
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#invoicesTab">
+            <i class="bi bi-receipt me-1"></i>Invoices (@Model.Invoices.Count)
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="visitsTab">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Visit History</span>
+                <a asp-page="/Visits/Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>New Visit</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Visits.Any())
+                {
+                    <div class="empty-state"><i class="bi bi-calendar2-x"></i>No visits recorded</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Date</th><th>Doctor</th><th>Complaint</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var v in Model.Visits)
+                        {
+                            <tr>
+                                <td>@v.VisitDate.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                <td>@v.DoctorName</td>
+                                <td class="text-muted">@(v.Complaint.Length > 50 ? v.Complaint[..50] + "…" : v.Complaint)</td>
+                                <td><span class="badge badge-@v.Status.ToString().ToLower()">@v.Status</span></td>
+                                <td><a asp-page="/Visits/Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-secondary">View</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="invoicesTab">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Billing History</span>
+                <a asp-page="/Billing/Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>New Invoice</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Invoices.Any())
+                {
+                    <div class="empty-state"><i class="bi bi-receipt-cutoff"></i>No invoices found</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Invoice #</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var inv in Model.Invoices)
+                        {
+                            <tr>
+                                <td class="font-monospace">@inv.InvoiceNumber</td>
+                                <td>@inv.TotalAmount.ToString("F2").Insert(0, "E")</td>
+                                <td class="text-success">@inv.PaidAmount.ToString("F2").Insert(0, "E")</td>
+                                <td class="@(inv.Balance > 0 ? "text-danger fw-medium" : "")">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                                <td><span class="badge badge-status-@inv.Status.ToString().ToLower()">@inv.Status</span></td>
+                                <td><a asp-page="/Billing/Details" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-secondary">View</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

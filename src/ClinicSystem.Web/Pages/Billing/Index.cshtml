@@ -1,0 +1,71 @@
+@page
+@model ClinicSystem.Web.Pages.Billing.IndexModel
+@{
+    ViewData["Title"] = "Billing";
+}
+
+<div class="action-bar">
+    <form method="get" class="d-flex gap-2">
+        <select name="StatusFilter" class="form-select form-select-sm" style="width:160px;" onchange="this.form.submit()">
+            <option value="" selected="@(Model.StatusFilter == null)">All Statuses</option>
+            <option value="Unpaid" selected="@(Model.StatusFilter == "Unpaid")">Unpaid</option>
+            <option value="Partial" selected="@(Model.StatusFilter == "Partial")">Partial</option>
+            <option value="Paid" selected="@(Model.StatusFilter == "Paid")">Paid</option>
+        </select>
+    </form>
+    <a asp-page="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>New Invoice</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Invoices.Any())
+        {
+            <div class="empty-state"><i class="bi bi-receipt-cutoff"></i><p>No invoices found.</p></div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end">Paid</th>
+                        <th class="text-end">Balance</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var inv in Model.Invoices)
+                {
+                    <tr>
+                        <td class="font-monospace fw-medium">
+                            <a asp-page="Details" asp-route-id="@inv.Id" class="text-decoration-none">@inv.InvoiceNumber</a>
+                        </td>
+                        <td>
+                            <a asp-page="/Patients/Details" asp-route-id="@inv.PatientId" class="text-decoration-none text-muted">
+                                @inv.PatientName
+                            </a>
+                        </td>
+                        <td class="text-muted text-nowrap">@inv.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</td>
+                        <td class="text-end">@inv.TotalAmount.ToString("F2").Insert(0, "E")</td>
+                        <td class="text-end text-success">@inv.PaidAmount.ToString("F2").Insert(0, "E")</td>
+                        <td class="text-end @(inv.Balance > 0 ? "text-danger fw-medium" : "text-muted")">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                        <td>
+                            <span class="badge badge-status-@inv.Status.ToString().ToLower()">@inv.Status</span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="Details" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+<p class="text-muted mt-2" style="font-size:.8rem;">@Model.Invoices.Count invoice(s) shown</p>

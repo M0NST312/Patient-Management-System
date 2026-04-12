@@ -1,0 +1,115 @@
+@page
+@model ClinicSystem.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card" style="background:linear-gradient(135deg,#dbeafe,#eff6ff);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#3b82f6;color:#fff;"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <div class="stat-value" style="color:#1e3a5f;">@Model.PatientCount</div>
+                    <div class="stat-label">Total Patients</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#10b981;color:#fff;"><i class="bi bi-calendar2-check-fill"></i></div>
+                <div>
+                    <div class="stat-value" style="color:#065f46;">@Model.VisitCount</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#f59e0b;color:#fff;"><i class="bi bi-receipt-cutoff"></i></div>
+                <div>
+                    <div class="stat-value" style="color:#78350f;">@Model.InvoiceCount</div>
+                    <div class="stat-label">Total Invoices</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card" style="background:linear-gradient(135deg,#fee2e2,#fff1f2);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#ef4444;color:#fff;"><i class="bi bi-cash-stack"></i></div>
+                <div>
+                    <div class="stat-value" style="color:#7f1d1d;">@Model.OutstandingBalance.ToString("F2").Insert(0, "E")</div>
+                    <div class="stat-label">Outstanding Balance</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar2-check me-2 text-success"></i>Recent Visits</span>
+                <a asp-page="/Visits/Index" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.RecentVisits.Any())
+                {
+                    <div class="empty-state"><i class="bi bi-calendar2-x"></i>No visits recorded yet</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var v in Model.RecentVisits)
+                        {
+                            <tr>
+                                <td><a asp-page="/Visits/Details" asp-route-id="@v.Id" class="text-decoration-none fw-medium">@v.PatientName</a></td>
+                                <td class="text-muted">@v.DoctorName</td>
+                                <td class="text-muted">@v.VisitDate.ToLocalTime().ToString("MMM d")</td>
+                                <td><span class="badge badge-@v.Status.ToString().ToLower()">@v.Status</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt me-2 text-warning"></i>Unpaid Invoices</span>
+                <a asp-page="/Billing/Index" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.UnpaidInvoices.Any())
+                {
+                    <div class="empty-state"><i class="bi bi-check2-circle"></i>All invoices are paid!</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Invoice #</th><th>Patient</th><th>Balance</th></tr></thead>
+                        <tbody>
+                        @foreach (var inv in Model.UnpaidInvoices)
+                        {
+                            <tr>
+                                <td><a asp-page="/Billing/Details" asp-route-id="@inv.Id" class="text-decoration-none fw-medium">@inv.InvoiceNumber</a></td>
+                                <td class="text-muted">@inv.PatientName</td>
+                                <td class="fw-medium text-danger">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
