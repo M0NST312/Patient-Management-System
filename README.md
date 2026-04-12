@@ -84,11 +84,3 @@ ClinicSystem/
 | Record payments   | ✓     | –      | ✓            |
 | Delete records    | ✓     | –      | –            |
 
-## What Was Fixed
-
-- **Form binding bugs**: All page models now use flat `InputModel` classes — record DTOs with required init-only props can't be properly bound by Razor Pages model binder. This was the root cause of forms not working.
-- **PatientRepository.GetByIdAsync**: Override now includes Address and Contacts so Edit page populates correctly.
-- **VisitRepository.GetAllAsync**: Now includes Patient navigation property so Visits list shows patient names.
-- **Invoice number generation**: Fixed race condition in sequential numbering.
-- **Visit details**: Add/remove diagnosis and prescription now works inline without page reload cycle loss.
-- **Auth service**: Extracted `IAuthService` to Application layer; implementation stays in Infrastructure.
