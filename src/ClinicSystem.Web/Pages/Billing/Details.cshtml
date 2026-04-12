@@ -50,9 +50,9 @@
                     {
                         <tr>
                             <td>@item.Description</td>
-                            <td class="text-end">@item.UnitPrice.ToString("F2").Insert(0, "E")</td>
+                            <td class="text-end">E @item.UnitPrice.ToString("F2")</td>
                             <td class="text-center">@item.Quantity</td>
-                            <td class="text-end fw-medium">@item.Total.ToString("F2").Insert(0, "E")</td>
+                            <td class="text-end fw-medium">E @item.Total.ToString("F2")</td>
                         </tr>
                     }
                     </tbody>
@@ -61,12 +61,12 @@
                         {
                             <tr>
                                 <td colspan="3" class="text-end text-muted">Discount</td>
-                                <td class="text-end text-success">–@Model.Invoice.DiscountAmount.ToString("F2").Insert(0, "E")</td>
+                                <td class="text-end text-success">–E @Model.Invoice.DiscountAmount.ToString("F2")</td>
                             </tr>
                         }
                         <tr>
                             <td colspan="3" class="text-end fw-semibold">Total</td>
-                            <td class="text-end fw-bold fs-5">@Model.Invoice.TotalAmount.ToString("F2").Insert(0, "E")</td>
+                            <td class="text-end fw-bold fs-5">E @Model.Invoice.TotalAmount.ToString("F2")</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -89,9 +89,9 @@
                         @foreach (var p in Model.Invoice.Payments)
                         {
                             <tr>
-                                <td>@p.PaidDate.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                                <td>@p.PaidAtUtc.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
                                 <td><span class="badge bg-light text-dark">@p.Method</span></td>
-                                <td class="text-end text-success fw-medium">@p.Amount.ToString("F2").Insert(0, "E")</td>
+                                <td class="text-end text-success fw-medium">E @p.Amount.ToString("F2")</td>
                             </tr>
                         }
                         </tbody>
@@ -111,11 +111,11 @@
                             <div class="col-md-4">
                                 <label class="form-label">Amount <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text">E</span>
                                     <input name="Amount" class="form-control" type="number" step="0.01" min="0.01"
                                            max="@Model.Invoice.Balance" placeholder="0.00" required />
                                 </div>
-                                <div class="form-text">Balance: <strong class="text-danger">@Model.Invoice.Balance.ToString("F2").Insert(0, "E")</strong></div>
+                                <div class="form-text">Balance: <strong class="text-danger">E @Model.Invoice.Balance.ToString("F2")</strong></div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Payment Method <span class="text-danger">*</span></label>
@@ -151,27 +151,27 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
                     <span class="text-muted">Subtotal</span>
-                    <span>@(Model.Invoice.Items.Sum(i => i.Total).ToString("F2").Insert(0, "E"))</span>
+                    <span>E @(Model.Invoice.Items.Sum(i => i.Total).ToString("F2"))</span>
                 </div>
                 @if (Model.Invoice.DiscountAmount > 0)
                 {
                     <div class="d-flex justify-content-between mb-2 text-success">
                         <span>Discount</span>
-                        <span>–@Model.Invoice.DiscountAmount.ToString("F2").Insert(0, "E")</span>
+                        <span>–E @Model.Invoice.DiscountAmount.ToString("F2")</span>
                     </div>
                 }
                 <div class="d-flex justify-content-between mb-2 fw-semibold">
                     <span>Total</span>
-                    <span>@Model.Invoice.TotalAmount.ToString("F2").Insert(0, "E")</span>
+                    <span>E @Model.Invoice.TotalAmount.ToString("F2")</span>
                 </div>
                 <hr />
                 <div class="d-flex justify-content-between mb-2 text-success">
                     <span>Paid</span>
-                    <span>@Model.Invoice.PaidAmount.ToString("F2").Insert(0, "E")</span>
+                    <span>E @Model.Invoice.PaidAmount.ToString("F2")</span>
                 </div>
                 <div class="d-flex justify-content-between fw-bold @(Model.Invoice.Balance > 0 ? "text-danger" : "text-success")">
                     <span>Balance Due</span>
-                    <span class="fs-5">@Model.Invoice.Balance.ToString("F2").Insert(0, "E")</span>
+                    <span class="fs-5">E @Model.Invoice.Balance.ToString("F2")</span>
                 </div>
             </div>
         </div>

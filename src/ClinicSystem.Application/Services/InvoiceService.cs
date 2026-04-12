@@ -40,6 +40,23 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
         if (dto.Items == null || !dto.Items.Any())
             throw new ArgumentException("Invoice must have at least one item.");
 
+        // Validate invoice items
+        foreach (var item in dto.Items)
+        {
+            if (item.UnitPrice <= 0)
+                throw new ArgumentException("Unit price must be greater than zero.");
+            if (item.Quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.");
+        }
+
+        // Validate discount
+        if (dto.DiscountAmount < 0)
+            throw new ArgumentException("Discount amount cannot be negative.");
+        
+        var totalAmount = dto.Items.Sum(i => i.UnitPrice * i.Quantity);
+        if (dto.DiscountAmount > totalAmount)
+            throw new ArgumentException($"Discount amount ({dto.DiscountAmount:C}) cannot exceed total amount ({totalAmount:C}).");
+
         var invoiceNumber = await repository.GenerateNextInvoiceNumberAsync(ct);
         var invoice = new Invoice
         {

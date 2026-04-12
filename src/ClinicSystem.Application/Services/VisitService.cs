@@ -20,6 +20,12 @@ public class VisitService(IVisitRepository repository, IPatientRepository patien
         return visits.Select(MapToDetails).ToList();
     }
 
+    public async Task<IEnumerable<VisitDetailsDto>> GetRecentVisitsAsync(int count, CancellationToken ct = default)
+    {
+        var visits = await repository.GetRecentWithPatientAsync(count, ct);
+        return visits.Select(MapToDetails).ToList();
+    }
+
     public async Task<IEnumerable<VisitDetailsDto>> GetVisitsByPatientIdAsync(Guid patientId, CancellationToken ct = default)
     {
         var visits = await repository.GetByPatientIdAsync(patientId, ct);

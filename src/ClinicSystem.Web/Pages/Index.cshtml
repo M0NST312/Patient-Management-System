@@ -42,7 +42,7 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background:#ef4444;color:#fff;"><i class="bi bi-cash-stack"></i></div>
                 <div>
-                    <div class="stat-value" style="color:#7f1d1d;">@Model.OutstandingBalance.ToString("F2").Insert(0, "E")</div>
+                    <div class="stat-value" style="color:#7f1d1d;">E @Model.OutstandingBalance.ToString("F2")</div>
                     <div class="stat-label">Outstanding Balance</div>
                 </div>
             </div>
@@ -103,7 +103,7 @@
                             <tr>
                                 <td><a asp-page="/Billing/Details" asp-route-id="@inv.Id" class="text-decoration-none fw-medium">@inv.InvoiceNumber</a></td>
                                 <td class="text-muted">@inv.PatientName</td>
-                                <td class="fw-medium text-danger">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                                <td class="fw-medium text-danger">E @inv.Balance.ToString("F2")</td>
                             </tr>
                         }
                         </tbody>

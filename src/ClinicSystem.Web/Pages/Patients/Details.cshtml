@@ -161,9 +161,9 @@
                         {
                             <tr>
                                 <td class="font-monospace">@inv.InvoiceNumber</td>
-                                <td>@inv.TotalAmount.ToString("F2").Insert(0, "E")</td>
-                                <td class="text-success">@inv.PaidAmount.ToString("F2").Insert(0, "E")</td>
-                                <td class="@(inv.Balance > 0 ? "text-danger fw-medium" : "")">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                                <td>E @inv.TotalAmount.ToString("F2")</td>
+                                <td class="text-success">E @inv.PaidAmount.ToString("F2")</td>
+                                <td class="@(inv.Balance > 0 ? "text-danger fw-medium" : "")">E @inv.Balance.ToString("F2")</td>
                                 <td><span class="badge badge-status-@inv.Status.ToString().ToLower()">@inv.Status</span></td>
                                 <td><a asp-page="/Billing/Details" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-secondary">View</a></td>
                             </tr>

@@ -20,6 +20,7 @@ public interface IVisitService
 {
     Task<VisitDetailsDto?> GetVisitByIdAsync(Guid id, CancellationToken ct = default);
     Task<IEnumerable<VisitDetailsDto>> GetAllVisitsAsync(CancellationToken ct = default);
+    Task<IEnumerable<VisitDetailsDto>> GetRecentVisitsAsync(int count, CancellationToken ct = default);
     Task<IEnumerable<VisitDetailsDto>> GetVisitsByPatientIdAsync(Guid patientId, CancellationToken ct = default);
     Task<IEnumerable<VisitDetailsDto>> GetVisitsByStatusAsync(VisitStatus status, CancellationToken ct = default);
     Task<Guid> CreateVisitAsync(VisitCreateDto dto, CancellationToken ct = default);

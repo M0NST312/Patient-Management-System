@@ -45,7 +45,7 @@ public record InvoiceCreateDto(Guid PatientId, decimal DiscountAmount, List<Invo
 public record InvoiceUpdateDto(decimal DiscountAmount, List<InvoiceItemDto> Items);
 public record PaymentCreateDto(decimal Amount, string Method);
 
-public record PaymentDto(Guid Id, decimal Amount, string Method, DateTime PaidDate);
+public record PaymentDto(Guid Id, decimal Amount, string Method, DateTime PaidAtUtc);
 public record InvoiceItemDetailsDto(Guid Id, string Description, decimal UnitPrice, int Quantity, decimal Total);
 
 public record InvoiceDetailsDto(

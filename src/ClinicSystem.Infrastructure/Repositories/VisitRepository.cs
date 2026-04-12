@@ -12,6 +12,10 @@ public class VisitRepository(ApplicationDbContext context) : Repository<Visit>(c
         await DbSet.Include(v => v.Patient).Include(v => v.Diagnoses).Include(v => v.Prescriptions)
             .OrderByDescending(v => v.VisitDateUtc).ToListAsync(ct);
 
+    public async Task<IEnumerable<Visit>> GetRecentWithPatientAsync(int count, CancellationToken ct = default) =>
+        await DbSet.Include(v => v.Patient).Include(v => v.Diagnoses).Include(v => v.Prescriptions)
+            .OrderByDescending(v => v.VisitDateUtc).Take(count).ToListAsync(ct);
+
     public async Task<IEnumerable<Visit>> GetByPatientIdAsync(Guid patientId, CancellationToken ct = default) =>
         await DbSet.Where(v => v.PatientId == patientId)
             .Include(v => v.Diagnoses).Include(v => v.Prescriptions)

@@ -50,9 +50,9 @@
                             </a>
                         </td>
                         <td class="text-muted text-nowrap">@inv.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</td>
-                        <td class="text-end">@inv.TotalAmount.ToString("F2").Insert(0, "E")</td>
-                        <td class="text-end text-success">@inv.PaidAmount.ToString("F2").Insert(0, "E")</td>
-                        <td class="text-end @(inv.Balance > 0 ? "text-danger fw-medium" : "text-muted")">@inv.Balance.ToString("F2").Insert(0, "E")</td>
+                        <td class="text-end">E @inv.TotalAmount.ToString("F2")</td>
+                        <td class="text-end text-success">E @inv.PaidAmount.ToString("F2")</td>
+                        <td class="text-end @(inv.Balance > 0 ? "text-danger fw-medium" : "text-muted")">E @inv.Balance.ToString("F2")</td>
                         <td>
                             <span class="badge badge-status-@inv.Status.ToString().ToLower()">@inv.Status</span>
                         </td>
@@ -68,4 +68,49 @@
         }
     </div>
 </div>
-<p class="text-muted mt-2" style="font-size:.8rem;">@Model.Invoices.Count invoice(s) shown</p>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-3" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="1" asp-route-statusFilter="@Model.StatusFilter">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-statusFilter="@Model.StatusFilter">Previous</a>
+                </li>
+            }
+
+            @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+            {
+                @if (i == Model.PageNumber)
+                {
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">@i</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="Index" asp-route-pageNumber="@i" asp-route-statusFilter="@Model.StatusFilter">@i</a>
+                    </li>
+                }
+            }
+
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-statusFilter="@Model.StatusFilter">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@Model.TotalPages" asp-route-statusFilter="@Model.StatusFilter">Last</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+<p class="text-muted mt-3" style="font-size:.8rem;">Showing @Model.Invoices.Count of @Model.TotalCount invoice(s) (Page @Model.PageNumber of @Model.TotalPages)

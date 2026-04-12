@@ -1,9 +1,11 @@
 using ClinicSystem.Application.Dtos;
 using ClinicSystem.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ClinicSystem.Web.Pages;
 
+[Authorize]
 public class IndexModel(IPatientService patientService, IVisitService visitService, IInvoiceService invoiceService) : PageModel
 {
     public int PatientCount { get; private set; }
@@ -15,17 +17,12 @@ public class IndexModel(IPatientService patientService, IVisitService visitServi
 
     public async Task OnGetAsync()
     {
-        var tasks = new Task[]
-        {
-            Task.Run(async () => PatientCount = await patientService.GetTotalPatientsCountAsync()),
-            Task.Run(async () => VisitCount = await visitService.GetTotalVisitsCountAsync()),
-            Task.Run(async () => InvoiceCount = await invoiceService.GetTotalInvoicesCountAsync()),
-            Task.Run(async () => OutstandingBalance = await invoiceService.GetTotalOutstandingBalanceAsync()),
-        };
-        await Task.WhenAll(tasks);
+        PatientCount = await patientService.GetTotalPatientsCountAsync();
+        VisitCount = await visitService.GetTotalVisitsCountAsync();
+        InvoiceCount = await invoiceService.GetTotalInvoicesCountAsync();
+        OutstandingBalance = await invoiceService.GetTotalOutstandingBalanceAsync();
 
-        var allVisits = await visitService.GetAllVisitsAsync();
-        RecentVisits = allVisits.OrderByDescending(v => v.VisitDate).Take(5).ToList();
+        RecentVisits = (await visitService.GetRecentVisitsAsync(5)).ToList();
 
         var unpaidInvoices = await invoiceService.GetInvoicesByStatusAsync(Domain.Enums.InvoiceStatus.Unpaid);
         var partialInvoices = await invoiceService.GetInvoicesByStatusAsync(Domain.Enums.InvoiceStatus.Partial);
