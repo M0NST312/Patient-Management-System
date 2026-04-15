@@ -1,6 +1,8 @@
 # Clinic Patient Management System
 
-ASP.NET 10 Razor Pages clinic management app restructured into **Clean Architecture**.
+This project is a modern clinic management application built with ASP.NET 10 Razor Pages, designed and structured using Clean Architecture principles to ensure scalability, maintainability, and clear separation of concerns.
+
+Developed using Haiku 4.5 and Sonnet 4.6 with custom-built skills, the project serves as an experimental platform for refining and evaluating these capabilities in a real-world scenario. It focuses on iteratively improving architecture, code quality, and development workflows while delivering a functional system.
 
 ## Architecture
 
