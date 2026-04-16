@@ -106,7 +106,8 @@
             <div class="card">
                 <div class="card-header"><i class="bi bi-plus-circle me-2 text-primary"></i>Record Payment</div>
                 <div class="card-body">
-                    <form method="post" asp-page-handler="AddPayment">
+                    <form method="post" asp-page-handler="AddPayment" asp-route-id="@Model.Invoice.Id">
+                        <input type="hidden" name="id" value="@Model.Invoice.Id" />
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
                                 <label class="form-label">Amount <span class="text-danger">*</span></label>
