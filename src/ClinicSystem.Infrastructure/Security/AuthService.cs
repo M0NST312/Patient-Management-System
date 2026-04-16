@@ -1,5 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
+using BCrypt.Net;
 using ClinicSystem.Application.Common.Interfaces;
 using ClinicSystem.Application.Services.Interfaces;
 using ClinicSystem.Domain.Entities;
@@ -11,13 +10,24 @@ public static class PasswordHasher
 {
     public static string HashPassword(string password)
     {
-        using var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return Convert.ToBase64String(bytes);
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password cannot be empty.", nameof(password));
+        return BCrypt.Net.BCrypt.HashPassword(password);
     }
 
-    public static bool Verify(string password, string hash) =>
-        HashPassword(password) == hash;
+    public static bool Verify(string password, string hash)
+    {
+        if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(hash))
+            return false;
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
+        }
+        catch (SaltParseException)
+        {
+            return false;
+        }
+    }
 }
 
 public class PasswordHasherService : IPasswordHasher
@@ -31,7 +41,7 @@ public class AuthService(IUserRepository repository) : IAuthService
     public async Task<User?> AuthenticateAsync(string username, string password, CancellationToken ct = default)
     {
         var user = await repository.GetByUsernameAsync(username, ct);
-        if (user == null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
+        if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
             return null;
 
         user.LastLoginAtUtc = DateTime.UtcNow;
@@ -45,7 +55,7 @@ public class AuthService(IUserRepository repository) : IAuthService
         if (await repository.UsernameExistsAsync(username, null, ct))
             throw new ArgumentException($"Username '{username}' already exists.");
         if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
-            throw new ArgumentException("Password must be at least 6 characters.");
+            throw new ArgumentException("Password must be at least 6 characters.", nameof(password));
 
         var user = new User
         {
@@ -67,7 +77,7 @@ public class AuthService(IUserRepository repository) : IAuthService
         if (!PasswordHasher.Verify(currentPassword, user.PasswordHash))
             throw new UnauthorizedAccessException("Current password is incorrect.");
         if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-            throw new ArgumentException("New password must be at least 6 characters.");
+            throw new ArgumentException("New password must be at least 6 characters.", nameof(newPassword));
 
         user.PasswordHash = PasswordHasher.HashPassword(newPassword);
         repository.Update(user);

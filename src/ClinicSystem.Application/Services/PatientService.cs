@@ -10,13 +10,13 @@ public class PatientService(IPatientRepository repository) : IPatientService
     public async Task<PatientDetailsDto?> GetPatientByIdAsync(Guid id, CancellationToken ct = default)
     {
         var patient = await repository.GetByIdWithDetailsAsync(id, ct);
-        return patient == null ? null : MapToDetails(patient);
+        return patient is null ? null : MapToDetails(patient);
     }
 
     public async Task<PatientDetailsDto?> GetPatientByNationalIdAsync(string nationalId, CancellationToken ct = default)
     {
         var patient = await repository.GetByNationalIdAsync(nationalId, ct);
-        return patient == null ? null : MapToDetails(patient);
+        return patient is null ? null : MapToDetails(patient);
     }
 
     public async Task<IEnumerable<PatientDetailsDto>> GetAllPatientsAsync(CancellationToken ct = default)
@@ -45,14 +45,14 @@ public class PatientService(IPatientRepository repository) : IPatientService
             BloodType = dto.BloodType
         };
 
-        if (dto.Address != null)
+        if (dto.Address is not null)
             patient.Address = new Address
             {
                 Line1 = dto.Address.Line1, Line2 = dto.Address.Line2, City = dto.Address.City,
                 State = dto.Address.State, PostalCode = dto.Address.PostalCode, Country = dto.Address.Country
             };
 
-        if (dto.Contacts != null)
+        if (dto.Contacts is not null)
             patient.Contacts = dto.Contacts.Select(c => new Contact { Type = c.Type, Value = c.Value, IsEmergency = c.IsEmergency }).ToList();
 
         await repository.AddAsync(patient, ct);
@@ -74,9 +74,9 @@ public class PatientService(IPatientRepository repository) : IPatientService
         patient.NationalId = dto.NationalId;
         patient.BloodType = dto.BloodType;
 
-        if (dto.Address != null)
+        if (dto.Address is not null)
         {
-            if (patient.Address == null)
+            if (patient.Address is null)
                 patient.Address = new Address { PatientId = id, Line1 = dto.Address.Line1, City = dto.Address.City, Country = dto.Address.Country };
             patient.Address.Line1 = dto.Address.Line1;
             patient.Address.Line2 = dto.Address.Line2;
@@ -90,7 +90,7 @@ public class PatientService(IPatientRepository repository) : IPatientService
             patient.Address = null;
         }
 
-        if (dto.Contacts != null)
+        if (dto.Contacts is not null)
             patient.Contacts = dto.Contacts.Select(c => new Contact { Type = c.Type, Value = c.Value, IsEmergency = c.IsEmergency, PatientId = id }).ToList();
 
         repository.Update(patient);
@@ -109,7 +109,7 @@ public class PatientService(IPatientRepository repository) : IPatientService
 
     private static PatientDetailsDto MapToDetails(Patient patient) => new(
         patient.Id, patient.FullName, patient.DateOfBirth, patient.Gender, patient.NationalId, patient.BloodType,
-        patient.Address == null ? null : new AddressDto(patient.Address.Line1, patient.Address.Line2, patient.Address.City, patient.Address.State, patient.Address.PostalCode, patient.Address.Country),
+        patient.Address is null ? null : new AddressDto(patient.Address.Line1, patient.Address.Line2, patient.Address.City, patient.Address.State, patient.Address.PostalCode, patient.Address.Country),
         patient.Contacts.Select(c => new ContactDto(c.Type, c.Value, c.IsEmergency)).ToList()
     );
 }

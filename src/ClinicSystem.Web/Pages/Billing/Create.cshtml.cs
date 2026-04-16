@@ -57,7 +57,18 @@ public class CreateModel(IInvoiceService invoiceService, IPatientService patient
 
             return RedirectToPage("/Patients/Details", new { id = Input.PatientId });
         }
-        catch (Exception ex) { ModelState.AddModelError(string.Empty, ex.Message); }
+        catch (KeyNotFoundException ex) 
+        { 
+            ModelState.AddModelError(string.Empty, ex.Message); 
+        }
+        catch (ArgumentException ex) 
+        { 
+            ModelState.AddModelError(string.Empty, ex.Message); 
+        }
+        catch (InvalidOperationException ex) 
+        { 
+            ModelState.AddModelError(string.Empty, ex.Message); 
+        }
 
         await LoadPatientsAsync();
         await SetPreselectedNameAsync();

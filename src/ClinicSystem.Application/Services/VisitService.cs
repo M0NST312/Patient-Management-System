@@ -11,7 +11,7 @@ public class VisitService(IVisitRepository repository, IPatientRepository patien
     public async Task<VisitDetailsDto?> GetVisitByIdAsync(Guid id, CancellationToken ct = default)
     {
         var visit = await repository.GetWithDetailsAsync(id, ct);
-        return visit == null ? null : MapToDetails(visit);
+        return visit is null ? null : MapToDetails(visit);
     }
 
     public async Task<IEnumerable<VisitDetailsDto>> GetAllVisitsAsync(CancellationToken ct = default)

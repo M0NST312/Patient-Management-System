@@ -28,7 +28,12 @@ public class CreateModel(IUserService userService) : PageModel
             TempData["Success"] = $"User '{Input.Username}' created successfully.";
             return RedirectToPage("Index");
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return Page();
+        }
+        catch (InvalidOperationException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             return Page();

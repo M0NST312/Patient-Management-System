@@ -11,7 +11,7 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
     public async Task<InvoiceDetailsDto?> GetInvoiceByIdAsync(Guid id, CancellationToken ct = default)
     {
         var invoice = await repository.GetWithItemsAndPaymentsAsync(id, ct);
-        return invoice == null ? null : MapToDetails(invoice);
+        return invoice is null ? null : MapToDetails(invoice);
     }
 
     public async Task<IEnumerable<InvoiceDetailsDto>> GetAllInvoicesAsync(CancellationToken ct = default)
@@ -37,7 +37,7 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
         _ = await patientRepository.GetByIdAsync(dto.PatientId, ct)
             ?? throw new KeyNotFoundException($"Patient with ID '{dto.PatientId}' not found.");
 
-        if (dto.Items == null || !dto.Items.Any())
+        if (dto.Items is null or [] )
             throw new ArgumentException("Invoice must have at least one item.");
 
         // Validate invoice items

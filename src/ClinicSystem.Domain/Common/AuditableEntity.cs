@@ -2,6 +2,6 @@ namespace ClinicSystem.Domain.Common;
 
 public abstract class AuditableEntity
 {
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtUtc { get; set; }
+    public DateTime UpdatedAtUtc { get; set; }
 }

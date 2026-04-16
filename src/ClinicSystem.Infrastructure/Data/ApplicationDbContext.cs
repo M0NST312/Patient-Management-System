@@ -71,8 +71,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         var now = DateTime.UtcNow;
         foreach (var entry in entries)
         {
-            if (entry.State == EntityState.Added) entry.Entity.CreatedAtUtc = now;
-            if (entry.State is EntityState.Added or EntityState.Modified) entry.Entity.UpdatedAtUtc = now;
+            if (entry.State == EntityState.Added) 
+            {
+                entry.Entity.CreatedAtUtc = now;
+                // Special handling for Invoice.IssuedAtUtc
+                if (entry.Entity is Invoice invoice)
+                    invoice.IssuedAtUtc = now;
+            }
+            if (entry.State is EntityState.Added or EntityState.Modified) 
+                entry.Entity.UpdatedAtUtc = now;
         }
     }
 }

@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClinicSystem.Infrastructure.Repositories;
 
+#pragma warning disable CS9107
 public class VisitRepository(ApplicationDbContext context) : Repository<Visit>(context), IVisitRepository
+#pragma warning restore CS9107
 {
     public async Task<IEnumerable<Visit>> GetAllWithPatientAsync(CancellationToken ct = default) =>
         await DbSet.Include(v => v.Patient).Include(v => v.Diagnoses).Include(v => v.Prescriptions)

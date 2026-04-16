@@ -12,7 +12,7 @@ public class InvoiceCreateValidator : AbstractValidator<InvoiceCreateDto>
 
         RuleFor(x => x.Items)
             .NotEmpty().WithMessage("Invoice must have at least one item.")
-            .Must(items => items != null && items.Any()).WithMessage("Items list cannot be empty.");
+            .Must(items => items is not null and { Count: > 0 }).WithMessage("Items list cannot be empty.");
 
         RuleForEach(x => x.Items).SetValidator(new InvoiceItemValidator());
 
@@ -20,7 +20,8 @@ public class InvoiceCreateValidator : AbstractValidator<InvoiceCreateDto>
             .GreaterThanOrEqualTo(0).WithMessage("Discount amount cannot be negative.")
             .Must((dto, discount) =>
             {
-                if (dto.Items == null || !dto.Items.Any()) return true;
+                if (dto.Items is null or [])
+                    return true;
                 var total = dto.Items.Sum(i => i.UnitPrice * i.Quantity);
                 return discount <= total;
             })
@@ -51,7 +52,7 @@ public class InvoiceUpdateValidator : AbstractValidator<InvoiceUpdateDto>
     {
         RuleFor(x => x.Items)
             .NotEmpty().WithMessage("Invoice must have at least one item.")
-            .Must(items => items != null && items.Any()).WithMessage("Items list cannot be empty.");
+            .Must(items => items is not null and { Count: > 0 }).WithMessage("Items list cannot be empty.");
 
         RuleForEach(x => x.Items).SetValidator(new InvoiceItemValidator());
 
@@ -59,7 +60,8 @@ public class InvoiceUpdateValidator : AbstractValidator<InvoiceUpdateDto>
             .GreaterThanOrEqualTo(0).WithMessage("Discount amount cannot be negative.")
             .Must((dto, discount) =>
             {
-                if (dto.Items == null || !dto.Items.Any()) return true;
+                if (dto.Items is null or [])
+                    return true;
                 var total = dto.Items.Sum(i => i.UnitPrice * i.Quantity);
                 return discount <= total;
             })

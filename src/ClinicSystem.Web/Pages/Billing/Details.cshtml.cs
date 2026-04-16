@@ -26,7 +26,19 @@ public class DetailsModel(IInvoiceService invoiceService) : PageModel
             TempData["Success"] = $"Payment of E{amount:F2} recorded successfully.";
             return RedirectToPage(new { id });
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException ex)
+        {
+            Invoice = await invoiceService.GetInvoiceByIdAsync(id);
+            PaymentError = ex.Message;
+            return Page();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Invoice = await invoiceService.GetInvoiceByIdAsync(id);
+            PaymentError = ex.Message;
+            return Page();
+        }
+        catch (ArgumentException ex)
         {
             Invoice = await invoiceService.GetInvoiceByIdAsync(id);
             PaymentError = ex.Message;

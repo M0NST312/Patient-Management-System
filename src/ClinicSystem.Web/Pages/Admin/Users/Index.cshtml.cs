@@ -23,7 +23,14 @@ public class IndexModel(IUserService userService) : PageModel
             await userService.ToggleActiveAsync(id);
             TempData["Success"] = "User status updated.";
         }
-        catch (Exception ex) { TempData["Error"] = ex.Message; }
+        catch (KeyNotFoundException) 
+        { 
+            TempData["Error"] = "User not found."; 
+        }
+        catch (Exception ex) 
+        { 
+            TempData["Error"] = $"An error occurred: {ex.Message}"; 
+        }
         return RedirectToPage();
     }
 
@@ -34,7 +41,14 @@ public class IndexModel(IUserService userService) : PageModel
             await userService.DeleteUserAsync(id);
             TempData["Success"] = "User deleted successfully.";
         }
-        catch (Exception ex) { TempData["Error"] = ex.Message; }
+        catch (KeyNotFoundException) 
+        { 
+            TempData["Error"] = "User not found."; 
+        }
+        catch (Exception ex) 
+        { 
+            TempData["Error"] = $"An error occurred: {ex.Message}"; 
+        }
         return RedirectToPage();
     }
 }

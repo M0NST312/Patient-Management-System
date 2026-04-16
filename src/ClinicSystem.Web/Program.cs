@@ -66,7 +66,14 @@ try
                 Log.Information("Seeded default users: admin, doctor, receptionist");
             }
         }
-        catch (Exception ex) { Log.Warning(ex, "Database migration/seed failed — continuing startup"); }
+        catch (InvalidOperationException ex) 
+        { 
+            Log.Warning(ex, "Database migration failed — continuing startup without database"); 
+        }
+        catch (DbUpdateException ex) 
+        { 
+            Log.Warning(ex, "Database seed failed — continuing startup with migration only"); 
+        }
     }
 
     if (!app.Environment.IsDevelopment())

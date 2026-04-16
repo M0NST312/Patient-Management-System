@@ -9,7 +9,7 @@ public class Invoice : AuditableEntity
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [MaxLength(30)] public required string InvoiceNumber { get; set; }
     public Guid PatientId { get; set; }
-    public DateTime IssuedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime IssuedAtUtc { get; set; }
     public decimal DiscountAmount { get; set; }
     public InvoiceStatus Status { get; set; } = InvoiceStatus.Unpaid;
     public Patient Patient { get; set; } = null!;

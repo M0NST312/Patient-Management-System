@@ -13,12 +13,12 @@ public class EditModel(IUserService userService) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
     public string Username { get; private set; } = string.Empty;
-    public bool NotFound { get; private set; }
+    public bool IsNotFound { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var user = await userService.GetUserByIdAsync(id);
-        if (user is null) { NotFound = true; return Page(); }
+        if (user is null) { IsNotFound = true; return Page(); }
 
         Username = user.Username;
         Input = new InputModel
@@ -50,7 +50,7 @@ public class EditModel(IUserService userService) : PageModel
         if (!ModelState.IsValid)
         {
             var u = await userService.GetUserByIdAsync(id);
-            if (u != null) Username = u.Username;
+            if (u is not null) Username = u.Username;
             return Page();
         }
 
@@ -65,11 +65,25 @@ public class EditModel(IUserService userService) : PageModel
             TempData["Success"] = "User updated successfully.";
             return RedirectToPage("Index");
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             var u = await userService.GetUserByIdAsync(id);
-            if (u != null) Username = u.Username;
+            if (u is not null) Username = u.Username;
+            return Page();
+        }
+        catch (ArgumentException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var u = await userService.GetUserByIdAsync(id);
+            if (u is not null) Username = u.Username;
+            return Page();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var u = await userService.GetUserByIdAsync(id);
+            if (u is not null) Username = u.Username;
             return Page();
         }
     }

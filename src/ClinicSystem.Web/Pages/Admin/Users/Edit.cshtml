@@ -5,7 +5,7 @@
     ViewData["BackUrl"] = "/Admin/Users";
 }
 
-@if (Model.NotFound)
+@if (Model.IsNotFound)
 {
     <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>User not found.</div>
     return;
