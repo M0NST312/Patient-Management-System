@@ -1,0 +1,36 @@
+## Ignore Visual Studio temporary files, build results, and
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+x86/
+
+## NuGet
+*.nupkg
+.nuget/
+
+## Rider
+.idea/
+*.sln.iml
+
+## Local environment
+.env
+appsettings.*.json
+!appsettings.json
+
+## Logs
+logs/
+*.log
+
+## OS
+.DS_Store
+Thumbs.db
