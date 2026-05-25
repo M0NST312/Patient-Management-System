@@ -5,9 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>$(NoWarn);MVC1001</NoWarn>
   </PropertyGroup>
-  <!-- Prevent build systems from treating a repo-wide resx wildcard as an embedded resource
-       (some CI/CD environments expand or require matches for **/*.resx and error when none exist).
-       Removing the pattern is safe when you have no .resx files to include. -->
+
   <ItemGroup>
     <EmbeddedResource Remove="**/*.resx" />
   </ItemGroup>
