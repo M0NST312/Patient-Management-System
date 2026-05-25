@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.db
+node_modules/
+.git/
+Dockerfile*
+*.md

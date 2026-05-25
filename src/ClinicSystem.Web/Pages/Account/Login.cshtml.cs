@@ -19,22 +19,39 @@ public class LoginModel(IAuthService authService) : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid) { ErrorMessage = "Please fill in all fields."; return Page(); }
+        if (!ModelState.IsValid) 
+        { 
+            ErrorMessage = "Please fill in all fields."; 
+            return Page(); 
+        }
 
-        var user = await authService.AuthenticateAsync(Input.Username, Input.Password);
-        if (user is null) { ErrorMessage = "Invalid username or password."; return Page(); }
-
-        var claims = new List<Claim>
+        try
         {
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.Username),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(ClaimTypes.Role, user.Role.ToString())
-        };
+            var user = await authService.AuthenticateAsync(Input.Username, Input.Password);
+            if (user is null) 
+            { 
+                ErrorMessage = "Invalid username or password."; 
+                return Page(); 
+            }
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-        return RedirectToPage("/Index");
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.Username),
+                new(ClaimTypes.Email, user.Email ?? string.Empty),
+                new(ClaimTypes.Role, user.Role.ToString())
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+            return RedirectToPage("/Index");
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "An error occurred during login. Please try again later.";
+            // In production, log the exception here
+            return Page();
+        }
     }
 
     public class InputModel

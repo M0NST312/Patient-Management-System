@@ -123,8 +123,16 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
         invoice.Payments.Add(new Payment { InvoiceId = invoiceId, Amount = dto.Amount, Method = dto.Method, PaidAtUtc = DateTime.UtcNow });
         invoice.Status = totalPaid >= totalAmount ? InvoiceStatus.Paid : InvoiceStatus.Partial;
 
-        repository.Update(invoice);
-        await repository.SaveChangesAsync(ct);
+        try
+        {
+            repository.Update(invoice);
+            await repository.SaveChangesAsync(ct);
+        }
+        catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
+        {
+            // Handle concurrency exception - invoice was modified by another user
+            throw new InvalidOperationException("Invoice was modified by another user. Please refresh and try again.", ex);
+        }
     }
 
     public async Task<decimal> GetTotalOutstandingBalanceAsync(CancellationToken ct = default)

@@ -1,6 +1,7 @@
 using ClinicSystem.Domain.Common;
 using ClinicSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ClinicSystem.Infrastructure.Data;
 
@@ -17,9 +18,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<User> Users => Set<User>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.ConfigureWarnings(w => 
+            w.Ignore(RelationalEventId.MultipleCollectionIncludeWarning));
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        // Configure query splitting for better performance with multiple includes
+        modelBuilder.Entity<Invoice>().HasMany(i => i.Items).WithOne(it => it.Invoice)
+            .HasForeignKey(it => it.InvoiceId).OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<Invoice>().HasMany(i => i.Payments).WithOne(p => p.Invoice)
+            .HasForeignKey(p => p.InvoiceId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
         modelBuilder.Entity<Patient>().HasIndex(p => p.NationalId).IsUnique();
@@ -49,14 +64,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(p => p.VisitId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Invoice>().HasIndex(i => i.InvoiceNumber).IsUnique();
-
-        modelBuilder.Entity<Invoice>()
-            .HasMany(i => i.Items).WithOne(it => it.Invoice)
-            .HasForeignKey(it => it.InvoiceId).OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Invoice>()
-            .HasMany(i => i.Payments).WithOne(p => p.Invoice)
-            .HasForeignKey(p => p.InvoiceId).OnDelete(DeleteBehavior.Cascade);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

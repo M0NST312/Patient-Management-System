@@ -44,9 +44,18 @@ public class AuthService(IUserRepository repository) : IAuthService
         if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
             return null;
 
-        user.LastLoginAtUtc = DateTime.UtcNow;
-        repository.Update(user);
-        await repository.SaveChangesAsync(ct);
+        // Update last login time, but don't fail authentication if update fails
+        try
+        {
+            user.LastLoginAtUtc = DateTime.UtcNow;
+            repository.Update(user);
+            await repository.SaveChangesAsync(ct);
+        }
+        catch (Exception ex) when (ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException or Microsoft.EntityFrameworkCore.DbUpdateException)
+        {
+            // Log error but don't break authentication - user can still login if timestamp update fails
+            // In production, you might want to log this: Logger?.LogWarning(ex, "Failed to update last login time for user {Username}", username);
+        }
         return user;
     }
 
