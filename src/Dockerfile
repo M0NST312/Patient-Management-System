@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+FROM ://microsoft.com AS build
 WORKDIR /src
 
 # Installs findutils to support your GNU-specific cleanup commands in Alpine
@@ -9,12 +9,14 @@ COPY . .
 RUN find . -type d -name "obj" | xargs rm -rf
 RUN find . -type d -name "bin" | xargs rm -rf
 
-RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
+# UPDATED: Dynamically locates and restores the project file anywhere in the directory tree
+RUN dotnet restore **/ClinicSystem.Web.csproj
 
-WORKDIR /src/ClinicSystem.Web
-RUN dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# UPDATED: Dynamically locates the project folder, changes context, and publishes
+RUN cd $(dirname $(find . -name "ClinicSystem.Web.csproj" | head -n 1)) && \
+    dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+FROM ://microsoft.com AS runtime
 WORKDIR /app
 
 ENV ASPNETCORE_URLS=http://+:5000
