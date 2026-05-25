@@ -8,6 +8,8 @@ COPY src/ .
 RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
 
 WORKDIR /src/ClinicSystem.Web
+# Clean any cached build state before publishing to avoid stale glob references
+RUN dotnet clean -c Release 2>&1 || true && rm -rf bin/Release obj/Release
 RUN dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
