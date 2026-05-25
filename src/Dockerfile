@@ -1,5 +1,8 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
+
+# Installs findutils to support your GNU-specific cleanup commands in Alpine
+RUN apk add --no-cache findutils
 
 COPY . .
 
@@ -11,7 +14,7 @@ RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
 WORKDIR /src/ClinicSystem.Web
 RUN dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
 ENV ASPNETCORE_URLS=http://+:5000
