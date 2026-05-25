@@ -1,20 +1,20 @@
 FROM ://microsoft.com AS build
 WORKDIR /src
 
-# Installs findutils to support your GNU-specific cleanup commands in Alpine
+# Installs findutils to support your file-clearing commands
 RUN apk add --no-cache findutils
 
 COPY . .
 
+# Cleans build residue safely
 RUN find . -type d -name "obj" | xargs rm -rf
 RUN find . -type d -name "bin" | xargs rm -rf
 
-# UPDATED: Dynamically locates and restores the project file anywhere in the directory tree
-RUN dotnet restore **/ClinicSystem.Web.csproj
-
-# UPDATED: Dynamically locates the project folder, changes context, and publishes
-RUN cd $(dirname $(find . -name "ClinicSystem.Web.csproj" | head -n 1)) && \
-    dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# FIX: Native shell logic finds the project directory and executes restore/publish directly inside it
+RUN export TARGET_DIR=$(dirname $(find . -name "ClinicSystem.Web.csproj" | head -n 1)) && \
+    cd "$TARGET_DIR" && \
+    dotnet restore && \
+    dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 FROM ://microsoft.com AS runtime
 WORKDIR /app
