@@ -1,24 +1,26 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project files
-COPY ["src/ClinicSystem.Web/ClinicSystem.Web.csproj", "ClinicSystem.Web/"]
-COPY ["src/ClinicSystem.Application/ClinicSystem.Application.csproj", "ClinicSystem.Application/"]
-COPY ["src/ClinicSystem.Domain/ClinicSystem.Domain.csproj", "ClinicSystem.Domain/"]
-COPY ["src/ClinicSystem.Infrastructure/ClinicSystem.Infrastructure.csproj", "ClinicSystem.Infrastructure/"]
+# Copy csproj files
+COPY src/ClinicSystem.Web/ClinicSystem.Web.csproj src/ClinicSystem.Web/
+COPY src/ClinicSystem.Application/ClinicSystem.Application.csproj src/ClinicSystem.Application/
+COPY src/ClinicSystem.Domain/ClinicSystem.Domain.csproj src/ClinicSystem.Domain/
+COPY src/ClinicSystem.Infrastructure/ClinicSystem.Infrastructure.csproj src/ClinicSystem.Infrastructure/
 
-RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
+# Restore
+RUN dotnet restore src/ClinicSystem.Web/ClinicSystem.Web.csproj
 
-# Copy project source files (only the `src/` contents) and publish
-COPY src/ .
-WORKDIR /src/ClinicSystem.Web
-RUN dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# Copy everything
+COPY . .
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+# Publish
+WORKDIR /src/src/ClinicSystem.Web
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# listen on port 5000 inside the container
-ENV DOTNET_URLS=http://+:5000
+ENV ASPNETCORE_URLS=http://+:5000
 EXPOSE 5000
 
 COPY --from=build /app/publish .
