@@ -9,8 +9,8 @@ COPY ["src/ClinicSystem.Infrastructure/ClinicSystem.Infrastructure.csproj", "Cli
 
 RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
 
-# Copy everything else and publish
-COPY . .
+# Copy project source files (only the `src/` contents) and publish
+COPY src/ .
 WORKDIR /src/ClinicSystem.Web
 RUN dotnet publish "ClinicSystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
