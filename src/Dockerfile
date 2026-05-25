@@ -3,6 +3,9 @@ WORKDIR /src
 
 COPY . .
 
+RUN find . -type d -name "obj" | xargs rm -rf
+RUN find . -type d -name "bin" | xargs rm -rf
+
 RUN dotnet restore "ClinicSystem.Web/ClinicSystem.Web.csproj"
 
 WORKDIR /src/ClinicSystem.Web
