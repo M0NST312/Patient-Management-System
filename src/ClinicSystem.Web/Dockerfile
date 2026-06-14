@@ -1,17 +1,15 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 5000
-
 ENV ASPNETCORE_URLS=http://+:5000
-
 USER app
+
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["src/ClinicSystem.Web/ClinicSystem.Web.csproj", "src/ClinicSystem.Web/"]
-RUN dotnet restore "src/ClinicSystem.Web/ClinicSystem.Web.csproj"
+COPY ["ClinicSystem.Web.csproj", "."]
+RUN dotnet restore "ClinicSystem.Web.csproj"
 COPY . .
-WORKDIR "/src/src/ClinicSystem.Web"
 RUN dotnet build "ClinicSystem.Web.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
