@@ -57,13 +57,7 @@ try
             db.Database.Migrate();
             if (!db.Users.Any())
             {
-                db.Users.AddRange(
-                    new User { Username = "admin", FullName = "Administrator", Email = "admin@clinic.com", PasswordHash = PasswordHasher.HashPassword("Admin@123"), Role = UserRole.Admin, IsActive = true },
-                    new User { Username = "doctor", FullName = "Dr. John Smith", Email = "doctor@clinic.com", PasswordHash = PasswordHasher.HashPassword("Doctor@123"), Role = UserRole.Doctor, IsActive = true },
-                    new User { Username = "receptionist", FullName = "Sarah Johnson", Email = "reception@clinic.com", PasswordHash = PasswordHasher.HashPassword("Reception@123"), Role = UserRole.Receptionist, IsActive = true }
-                );
-                db.SaveChanges();
-                Log.Information("Seeded default users: admin, doctor, receptionist");
+                
             }
         }
         catch (InvalidOperationException ex) 
