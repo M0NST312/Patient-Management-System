@@ -7,9 +7,19 @@ USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["ClinicSystem.Web.csproj", "."]
-RUN dotnet restore "ClinicSystem.Web.csproj"
+COPY ["src/ClinicSystem.Web/ClinicSystem.Web.csproj", "src/ClinicSystem.Web/"]
+RUN dotnet restore "src/ClinicSystem.Web/ClinicSystem.Web.csproj"
 COPY . .
+
+# 🔍 DEBUG — remove these after fixing
+RUN echo "=== Files in /src/src/ClinicSystem.Web/ ===" && \
+    ls -la /src/src/ClinicSystem.Web/ && \
+    echo "=== .cs files ===" && \
+    find /src/src/ClinicSystem.Web -name "*.cs" | head -10 && \
+    echo "=== .razor files ===" && \
+    find /src/src/ClinicSystem.Web -name "*.razor" | head -10
+
+WORKDIR "/src/src/ClinicSystem.Web"
 RUN dotnet build "ClinicSystem.Web.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
