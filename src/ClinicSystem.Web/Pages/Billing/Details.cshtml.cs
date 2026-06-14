@@ -10,10 +10,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace ClinicSystem.Web.Pages.Billing;
 
 [Authorize(Roles = "Admin,Receptionist")]
-public class DetailsModel(IInvoiceService invoiceService) : PageModel
+public class DetailsModel(IInvoiceService invoiceService, ILogger<DetailsModel> logger) : PageModel
 {
     public InvoiceDetailsDto? Invoice { get; private set; }
     public string? PaymentError { get; private set; }
+    private readonly ILogger<DetailsModel> _logger = logger;
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
@@ -55,6 +56,13 @@ public class DetailsModel(IInvoiceService invoiceService) : PageModel
         {
             Invoice = await invoiceService.GetInvoiceByIdAsync(id);
             PaymentError = ex.Message;
+            return Page();
+        }
+        catch (Exception ex)
+        {
+            Invoice = await invoiceService.GetInvoiceByIdAsync(id);
+            _logger.LogError(ex, "Unexpected error while adding payment for InvoiceId={InvoiceId}", id);
+            PaymentError = "An unexpected error occurred while recording the payment. Please try again.";
             return Page();
         }
     }

@@ -117,8 +117,8 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
 
         if (string.IsNullOrWhiteSpace(dto.Method))
             throw new ArgumentException("Payment method is required.");
-        if (dto.Method.Length > 50)
-            throw new ArgumentException("Payment method cannot exceed 50 characters.");
+        if (dto.Method.Length > 30)
+            throw new ArgumentException("Payment method cannot exceed 30 characters.");
 
         var totalAmount = invoice.Items.Sum(x => x.Total) - invoice.DiscountAmount;
         var totalPaid = invoice.Payments.Sum(p => p.Amount) + dto.Amount;
@@ -134,13 +134,18 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
 
         try
         {
-            repository.Update(invoice);
+            // invoice was loaded tracked by the repository; no explicit Update required.
             await repository.SaveChangesAsync(ct);
         }
         catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
         {
             // Handle concurrency exception - invoice was modified by another user
             throw new InvalidOperationException("Invoice was modified by another user. Please refresh and try again.", ex);
+        }
+        catch (Exception ex) when (ex.GetType().Name == "DbUpdateException")
+        {
+            logger.LogError(ex, "Failed to persist payment for InvoiceId={InvoiceId}", invoiceId);
+            throw new ArgumentException("Failed to save payment. Database error: " + (ex.InnerException?.Message ?? ex.Message), ex);
         }
     }
 
