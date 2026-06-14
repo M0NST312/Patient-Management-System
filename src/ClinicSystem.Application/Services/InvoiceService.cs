@@ -3,10 +3,11 @@ using ClinicSystem.Application.Dtos;
 using ClinicSystem.Application.Services.Interfaces;
 using ClinicSystem.Domain.Entities;
 using ClinicSystem.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace ClinicSystem.Application.Services;
 
-public class InvoiceService(IInvoiceRepository repository, IPatientRepository patientRepository) : IInvoiceService
+public class InvoiceService(IInvoiceRepository repository, IPatientRepository patientRepository, ILogger<InvoiceService> logger) : IInvoiceService
 {
     public async Task<InvoiceDetailsDto?> GetInvoiceByIdAsync(Guid id, CancellationToken ct = default)
     {
@@ -114,8 +115,16 @@ public class InvoiceService(IInvoiceRepository repository, IPatientRepository pa
         if (dto.Amount <= 0)
             throw new ArgumentException("Payment amount must be greater than zero.");
 
+        if (string.IsNullOrWhiteSpace(dto.Method))
+            throw new ArgumentException("Payment method is required.");
+        if (dto.Method.Length > 50)
+            throw new ArgumentException("Payment method cannot exceed 50 characters.");
+
         var totalAmount = invoice.Items.Sum(x => x.Total) - invoice.DiscountAmount;
         var totalPaid = invoice.Payments.Sum(p => p.Amount) + dto.Amount;
+
+        logger.LogDebug("Adding payment. InvoiceId={InvoiceId} TotalAmount={TotalAmount} AlreadyPaid={AlreadyPaid} NewPayment={NewPayment} TotalPaid={TotalPaid}",
+            invoiceId, totalAmount, invoice.Payments.Sum(p => p.Amount), dto.Amount, totalPaid);
 
         if (totalPaid > totalAmount)
             throw new ArgumentException($"Payment of {dto.Amount:C} would exceed invoice balance of {invoice.Balance:C}.");

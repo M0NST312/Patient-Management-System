@@ -14,7 +14,7 @@ public class PaymentCreateValidator : AbstractValidator<PaymentCreateDto>
 
         RuleFor(x => x.Method)
             .NotEmpty().WithMessage("Payment method is required.")
-            .MaximumLength(30).WithMessage("Payment method cannot exceed 30 characters.")
-            .Matches(@"^[a-zA-Z\s]+$").WithMessage("Payment method can only contain letters and spaces.");
+            .MaximumLength(50).WithMessage("Payment method cannot exceed 50 characters.")
+            .Matches(@"^[\w\s\-\&\.,\/\(\)]+$").WithMessage("Payment method contains invalid characters.");
     }
 }

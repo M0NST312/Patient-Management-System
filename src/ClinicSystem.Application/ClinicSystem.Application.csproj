@@ -8,5 +8,6 @@
     <ProjectReference Include="..\ClinicSystem.Domain\ClinicSystem.Domain.csproj" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
 </Project>

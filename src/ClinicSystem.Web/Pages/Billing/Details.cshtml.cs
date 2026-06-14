@@ -1,5 +1,8 @@
 using ClinicSystem.Application.Dtos;
 using ClinicSystem.Application.Services.Interfaces;
+using ClinicSystem.Application.Validators;
+using FluentValidation;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,7 +25,17 @@ public class DetailsModel(IInvoiceService invoiceService) : PageModel
     {
         try
         {
-            await invoiceService.AddPaymentAsync(id, new PaymentCreateDto(amount, method));
+            var dto = new PaymentCreateDto(amount, method);
+            var validator = new PaymentCreateValidator();
+            var validation = await validator.ValidateAsync(dto);
+            if (!validation.IsValid)
+            {
+                Invoice = await invoiceService.GetInvoiceByIdAsync(id);
+                PaymentError = string.Join("; ", validation.Errors.Select(e => e.ErrorMessage));
+                return Page();
+            }
+
+            await invoiceService.AddPaymentAsync(id, dto);
             TempData["Success"] = $"Payment of E{amount:F2} recorded successfully.";
             return RedirectToPage(new { id });
         }
