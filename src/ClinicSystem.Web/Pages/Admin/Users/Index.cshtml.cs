@@ -1,4 +1,5 @@
 using ClinicSystem.Application.Dtos;
+using System;
 using ClinicSystem.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,8 @@ public class IndexModel(IUserService userService) : PageModel
 
     public async Task OnGetAsync()
     {
-        Users = await userService.GetAllUsersAsync();
+        var all = await userService.GetAllUsersAsync();
+        Users = all.Where(u => !string.Equals(u.Username, "maintainance", StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<IActionResult> OnPostToggleAsync(Guid id)
