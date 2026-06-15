@@ -12,6 +12,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPatientService, PatientService>();
         services.AddScoped<IVisitService, VisitService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
+        services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IUserService, UserService>();
         services.AddValidatorsFromAssembly(typeof(ApplicationServiceExtensions).Assembly);
         return services;

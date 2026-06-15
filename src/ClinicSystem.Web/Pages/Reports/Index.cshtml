@@ -1,0 +1,53 @@
+@page
+@model ClinicSystem.Web.Pages.Reports.IndexModel
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="card">
+    <div class="card-header">Reports</div>
+    <div class="card-body">
+        <form method="post" asp-page-handler="ExportInvoices" class="mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">From</label>
+                    <input asp-for="From" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To</label>
+                    <input asp-for="To" class="form-control" type="date" />
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary">Export Invoices</button>
+                </div>
+            </div>
+        </form>
+
+        <form method="post" asp-page-handler="ExportPatients" class="mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <p class="mb-0">Export patient register</p>
+                </div>
+                <div class="col-md-3 text-end">
+                    <button class="btn btn-primary">Export Patients</button>
+                </div>
+            </div>
+        </form>
+
+        <form method="post" asp-page-handler="ExportVisits" class="mb-0">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">From</label>
+                    <input asp-for="From" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To</label>
+                    <input asp-for="To" class="form-control" type="date" />
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary">Export Visits</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
