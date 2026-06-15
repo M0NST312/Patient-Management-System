@@ -57,8 +57,10 @@
         .search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .search-box input { padding-left: 2rem; }
     </style>
+    <link href="~/css/site.css" rel="stylesheet">
 </head>
 <body>
+    <div id="sidebarOverlay" class="sidebar-overlay" style="display:none"></div>
 <div class="sidebar">
     <div class="sidebar-brand">
         <div class="d-flex align-items-center gap-2">
@@ -111,6 +113,7 @@
 
 <div class="main-content">
     <div class="topbar">
+            <button class="btn btn-sm btn-outline-secondary d-md-none me-2" id="sidebarToggle" aria-label="Toggle navigation"><i class="bi bi-list"></i></button>
         <h1 class="topbar-title">@ViewData["Title"]</h1>
         <div class="d-flex align-items-center gap-2">
             @if (ViewData["BackUrl"] != null)
@@ -141,6 +144,28 @@
 </div>
 
 <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function(){
+        var btn = document.getElementById('sidebarToggle');
+        var overlay = document.getElementById('sidebarOverlay');
+        var body = document.body;
+        if(btn){
+            btn.addEventListener('click', function(){
+                // toggle class which shows the sidebar via CSS
+                if(body.classList.contains('sidebar-open')){
+                    body.classList.remove('sidebar-open');
+                    if(overlay) overlay.style.display = 'none';
+                } else {
+                    body.classList.add('sidebar-open');
+                    if(overlay) overlay.style.display = 'block';
+                }
+            });
+        }
+        if(overlay){
+            overlay.addEventListener('click', function(){ body.classList.remove('sidebar-open'); overlay.style.display = 'none'; });
+        }
+    })();
+</script>
 @RenderSection("Scripts", required: false)
 </body>
 </html>

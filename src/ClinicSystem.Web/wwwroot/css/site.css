@@ -1,0 +1,32 @@
+/* Mobile-first responsive overrides for ClinicSystem */
+:root{--sidebar-width:230px}
+/* Sidebar mobile behavior */
+@media (max-width: 767.98px){
+  .sidebar{transform:translateX(-110%);transition:transform .25s ease-in-out;}
+  body.sidebar-open .sidebar{transform:translateX(0);} 
+  .main-content{margin-left:0 !important;}
+  .topbar .topbar-title{font-size:1rem}
+  /* make sidebar items slightly larger for touch */
+  .sidebar .nav-link{padding:.75rem .9rem;font-size:1rem}
+  .sidebar{z-index:1050}
+  .sidebar-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1040;opacity:0;transition:opacity .2s}
+  body.sidebar-open .sidebar-overlay{opacity:1}
+}
+
+/* General responsive tweaks */
+@media (max-width: 991.98px){
+  .page-content{padding:1rem}
+  .card { border-radius:10px }
+}
+
+/* Make images and fixed-width elements scale */
+img, .img-fluid{max-width:100%;height:auto}
+
+/* Ensure form controls take full width on small screens */
+.form-control, .form-select{width:100%}
+
+/* Table responsiveness: keep Bootstrap's wrapper behavior as fallback */
+.table-responsive{overflow-x:auto}
+
+/* Improve touch targets */
+button, .btn{min-height:40px;padding:.55rem .75rem}
